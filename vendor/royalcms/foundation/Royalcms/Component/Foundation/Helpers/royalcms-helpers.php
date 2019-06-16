@@ -214,6 +214,37 @@ if ( ! function_exists('safe_replace'))
     }
 }
 
+if ( ! function_exists('safe_remove'))
+{
+    /**
+     * 安全过滤函数
+     *
+     * @param
+     *            $string
+     * @return string
+     */
+    function safe_remove($string)
+    {
+        $string = str_replace('%20', '', $string);
+        $string = str_replace('%27', '', $string);
+        $string = str_replace('%2527', '', $string);
+        $string = str_replace('*', '', $string);
+        $string = str_replace('"', '', $string);
+        $string = str_replace("'", '', $string);
+        $string = str_replace('"', '', $string);
+        $string = str_replace(';', '', $string);
+        $string = str_replace('<', '', $string);
+        $string = str_replace('>', '', $string);
+        $string = str_replace("{", '', $string);
+        $string = str_replace('}', '', $string);
+        $string = str_replace('\\', '', $string);
+        $string = str_replace('/', '', $string);
+        $string = str_replace('[', '', $string);
+        $string = str_replace(']', '', $string);
+        return $string;
+    }
+}
+
 if ( ! function_exists('trim_unsafe_control_chars'))
 {
     /**
@@ -225,142 +256,6 @@ if ( ! function_exists('trim_unsafe_control_chars'))
     {
         $rule = '/[' . chr(1) . '-' . chr(8) . chr(11) . '-' . chr(12) . chr(14) . '-' . chr(31) . ']*/';
         return str_replace(chr(0), '', preg_replace($rule, '', $str));
-    }
-}
-
-if ( ! function_exists('remove_xss'))
-{
-    /**
-     * xss过滤函数
-     *
-     * @param
-     *            $string
-     * @return string
-     */
-    function remove_xss($string)
-    {
-        $string = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S', '', $string);
-    
-        $parm1 = Array(
-            'javascript',
-            'vbscript',
-            'expression',
-            'applet',
-            'meta',
-            'xml',
-            'blink',
-            'link',
-            'script',
-            'embed',
-            'object',
-            'iframe',
-            'frame',
-            'frameset',
-            'ilayer',
-            'layer',
-            'bgsound',
-            'title',
-            'base'
-        );
-    
-        $parm2 = Array(
-            'onabort',
-            'onactivate',
-            'onafterprint',
-            'onafterupdate',
-            'onbeforeactivate',
-            'onbeforecopy',
-            'onbeforecut',
-            'onbeforedeactivate',
-            'onbeforeeditfocus',
-            'onbeforepaste',
-            'onbeforeprint',
-            'onbeforeunload',
-            'onbeforeupdate',
-            'onblur',
-            'onbounce',
-            'oncellchange',
-            'onchange',
-            'onclick',
-            'oncontextmenu',
-            'oncontrolselect',
-            'oncopy',
-            'oncut',
-            'ondataavailable',
-            'ondatasetchanged',
-            'ondatasetcomplete',
-            'ondblclick',
-            'ondeactivate',
-            'ondrag',
-            'ondragend',
-            'ondragenter',
-            'ondragleave',
-            'ondragover',
-            'ondragstart',
-            'ondrop',
-            'onerror',
-            'onerrorupdate',
-            'onfilterchange',
-            'onfinish',
-            'onfocus',
-            'onfocusin',
-            'onfocusout',
-            'onhelp',
-            'onkeydown',
-            'onkeypress',
-            'onkeyup',
-            'onlayoutcomplete',
-            'onload',
-            'onlosecapture',
-            'onmousedown',
-            'onmouseenter',
-            'onmouseleave',
-            'onmousemove',
-            'onmouseout',
-            'onmouseover',
-            'onmouseup',
-            'onmousewheel',
-            'onmove',
-            'onmoveend',
-            'onmovestart',
-            'onpaste',
-            'onpropertychange',
-            'onreadystatechange',
-            'onreset',
-            'onresize',
-            'onresizeend',
-            'onresizestart',
-            'onrowenter',
-            'onrowexit',
-            'onrowsdelete',
-            'onrowsinserted',
-            'onscroll',
-            'onselect',
-            'onselectionchange',
-            'onselectstart',
-            'onstart',
-            'onstop',
-            'onsubmit',
-            'onunload'
-        );
-    
-        $parm = array_merge($parm1, $parm2);
-    
-        for ($i = 0; $i < sizeof($parm); $i ++) {
-            $pattern = '/';
-            for ($j = 0; $j < strlen($parm[$i]); $j ++) {
-                if ($j > 0) {
-                    $pattern .= '(';
-                    $pattern .= '(&#[x|X]0([9][a][b]);?)?';
-                    $pattern .= '|(&#0([9][10][13]);?)?';
-                    $pattern .= ')?';
-                }
-                $pattern .= $parm[$i][$j];
-            }
-            $pattern .= '/i';
-            $string = preg_replace($pattern, ' ', $string);
-        }
-        return $string;
     }
 }
 
@@ -815,7 +710,7 @@ if ( ! function_exists('is_ajax'))
      */
     function is_ajax()
     {
-        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+        if (array_key_exists('HTTP_X_REQUESTED_WITH', $_SERVER) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
             return true;
         } else {
             return false;
@@ -834,6 +729,23 @@ if ( ! function_exists('is_rtl'))
     function is_rtl() {
         // 'ltr'
         return false;
+    }
+}
+
+if ( ! function_exists('is_rc_error'))
+{
+    /**
+     * Check whether variable is a \Royalcms\Component\Error\Error.
+     *
+     * Returns true if $thing is an object of the ecjia_error class.
+     *
+     * @since 1.0.0
+     *
+     * @param mixed $thing Check if unknown variable is a RC_Error object.
+     * @return bool True, if RC_Error. False, if not RC_Error.
+     */
+    function is_rc_error($thing) {
+        return RC_Error::is_error($thing);
     }
 }
 
@@ -1849,6 +1761,61 @@ if ( ! function_exists('_deprecated_argument'))
                 } else {
                     trigger_error( sprintf( '%1$s was called with an argument that is <strong>deprecated</strong> since version %2$s with no alternative available.', $function, $version ) );
                 }
+            }
+        }
+    }
+}
+
+if (! function_exists('_deprecated_hook'))
+{
+    /**
+     * Marks a deprecated action or filter hook as deprecated and throws a notice.
+     *
+     * Use the {@see 'deprecated_hook_run'} action to get the backtrace describing where
+     * the deprecated hook was called.
+     *
+     * Default behavior is to trigger a user error if `WP_DEBUG` is true.
+     *
+     * This function is called by the do_action_deprecated() and apply_filters_deprecated()
+     * functions, and so generally does not need to be called directly.
+     *
+     * @since 4.6.0
+     * @access private
+     *
+     * @param string $hook        The hook that was used.
+     * @param string $version     The version of Royalcms that deprecated the hook.
+     * @param string $replacement Optional. The hook that should have been used.
+     * @param string $message     Optional. A message regarding the change.
+     */
+    function _deprecated_hook( $hook, $version, $replacement = null, $message = null ) {
+        /**
+         * Fires when a deprecated hook is called.
+         *
+         * @since 4.6.0
+         *
+         * @param string $hook        The hook that was called.
+         * @param string $replacement The hook that should be used as a replacement.
+         * @param string $version     The version of WordPress that deprecated the argument used.
+         * @param string $message     A message regarding the change.
+         */
+        RC_Hook::do_action( 'deprecated_hook_run', $hook, $replacement, $version, $message );
+
+        /**
+         * Filters whether to trigger deprecated hook errors.
+         *
+         * @since 4.6.0
+         *
+         * @param bool $trigger Whether to trigger deprecated hook errors. Requires
+         *                      `RC_DEBUG` to be defined true.
+         */
+        if ( RC_DEBUG && RC_Hook::apply_filters( 'deprecated_hook_trigger_error', true ) ) {
+            $message = empty( $message ) ? '' : ' ' . $message;
+            if ( ! is_null( $replacement ) ) {
+                /* translators: 1: ECJia hook name, 2: version number, 3: alternative hook name */
+                trigger_error( sprintf( __( '%1$s is <strong>deprecated</strong> since version %2$s! Use %3$s instead.' ), $hook, $version, $replacement ) . $message );
+            } else {
+                /* translators: 1: ECJia hook name, 2: version number */
+                trigger_error( sprintf( __( '%1$s is <strong>deprecated</strong> since version %2$s with no alternative available.' ), $hook, $version ) . $message );
             }
         }
     }

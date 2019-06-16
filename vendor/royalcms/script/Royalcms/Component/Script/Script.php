@@ -1,10 +1,15 @@
-<?php namespace Royalcms\Component\Script;
+<?php
+
+namespace Royalcms\Component\Script;
 
 use RC_Hook;
 
-final class Script
+class Script
 {
 
+    /**
+     * @var \Royalcms\Component\Script\HandleScripts
+     */
     private static $instance = null;
 
     public function __construct()
@@ -15,7 +20,6 @@ final class Script
     /**
      * 返回当前终级类对象的实例
      *
-     * @param $cache_config 缓存配置            
      * @return object
      */
     public static function instance()
@@ -34,8 +38,8 @@ final class Script
      * Makes use of already-instantiated $rc_scripts global if present. Use provided admin_print_scripts
      * hook to register/enqueue new scripts.
      *
-     * @see Component_Hook_Scripts::do_items()
-     * @global Component_Hook_Scripts $rc_scripts The Component_Hook_Scripts object for printing scripts.
+     * @see \Royalcms\Component\Script\HandleScripts::do_items()
+     * @global \Royalcms\Component\Script\HandleScripts $rc_scripts The \Royalcms\Component\Script\HandleScripts object for printing scripts.
      *        
      * @since 3.0.0
      *       
@@ -70,7 +74,7 @@ final class Script
      * Registers a script to be linked later using the RC_script::enqueue_script() function.
      *
      * @see Component_Hook_Dependencies::add(), Component_Hook_Dependencies::add_data()
-     * @global Component_Hook_Scripts $rc_scripts The Component_Hook_Scripts object for printing scripts.
+     * @global \Royalcms\Component\Script\HandleScripts $rc_scripts The \Royalcms\Component\Script\HandleScripts object for printing scripts.
      *        
      * @since 3.0.0
      *       
@@ -113,7 +117,7 @@ final class Script
      * </code>
      *
      * @see Component_Hook_Dependencies::localize()
-     * @global Component_Hook_Scripts $rc_scripts The Component_Hook_Scripts object for printing scripts.
+     * @global \Royalcms\Component\Script\HandleScripts $rc_scripts The \Royalcms\Component\Script\HandleScripts object for printing scripts.
      *        
      * @since 3.0.0
      *       
@@ -138,7 +142,7 @@ final class Script
      * such as jQuery core, from being unregistered.
      *
      * @see Component_Hook_Dependencies::remove()
-     * @global Component_Hook_Scripts $rc_scripts The Component_Hook_Scripts object for printing scripts.
+     * @global \Royalcms\Component\Script\HandleScripts $rc_scripts The \Royalcms\Component\Script\HandleScripts object for printing scripts.
      *        
      * @since 3.0.0
      *       
@@ -156,7 +160,7 @@ final class Script
      * Registers the script if $src provided (does NOT overwrite), and enqueues it.
      *
      * @see Component_Hook_Dependencies::add(), Component_Hook_Dependencies::add_data(), Component_Hook_Dependencies::enqueue()
-     * @global Component_Hook_Scripts $rc_scripts The Component_Hook_Scripts object for printing scripts.
+     * @global \Royalcms\Component\Script\HandleScripts $rc_scripts The \Royalcms\Component\Script\HandleScripts object for printing scripts.
      *        
      * @since 3.0.0
      *       
@@ -190,11 +194,11 @@ final class Script
      * Remove a previously enqueued script.
      *
      * @see Component_Hook_Dependencies::dequeue()
-     * @global Component_Hook_Scripts $rc_scripts The Component_Hook_Scripts object for printing scripts.
+     * @global \Royalcms\Component\Script\HandleScripts $rc_scripts The \Royalcms\Component\Script\HandleScripts object for printing scripts.
      *        
      * @since 3.0.0
      *       
-     * @param string $handle
+     * @param string|array $handle
      *            Name of the script to be removed.
      */
     public static function dequeue_script($handle)
@@ -205,7 +209,7 @@ final class Script
     /**
      * Check whether a script has been added to the queue.
      *
-     * @global Component_Hook_Scripts $rc_scripts The Component_Hook_Scripts object for printing scripts.
+     * @global \Royalcms\Component\Script\HandleScripts $rc_scripts The \Royalcms\Component\Script\HandleScripts object for printing scripts.
      * @since 3.0.0 'enqueued' added as an alias of the 'queue' list.
      *       
      * @param string $handle

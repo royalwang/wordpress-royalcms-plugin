@@ -17,14 +17,18 @@ use Royalcms\Component\Support\Collection;
 
 /**
  * @method Response app(array $config) APP 支付
+ * @method Response wap(array $config) H5 支付
  * @method Collection groupRedpack(array $config) 分裂红包
  * @method Collection miniapp(array $config) 小程序支付
  * @method Collection mp(array $config) 公众号支付
  * @method Collection pos(array $config) 刷卡支付
  * @method Collection redpack(array $config) 普通红包
  * @method Collection scan(array $config) 扫码支付
- * @method Collection transfer(array $config) 企业付款
- * @method Response wap(array $config) H5 支付
+ * @method Collection transfer($order) 微信钱包付款
+ * @method Collection transferQuery($order) 微信钱包付款查询
+ * @method Collection transferBank($order) 微信银行付款
+ * @method Collection transferBankQuery($order) 微信银行付款查询
+ * @method Collection publicKey($order) 获取RSA公钥
  */
 class Wechat implements GatewayApplicationInterface
 {
@@ -78,22 +82,6 @@ class Wechat implements GatewayApplicationInterface
         $this->config = $config;
         $this->mode = $this->config->get('mode', self::MODE_NORMAL);
         $this->gateway = Support::baseUri($this->mode);
-//        $this->payload = [
-//            'appid'            => $this->config->get('app_id', ''),
-//            'mch_id'           => $this->config->get('mch_id', ''),
-//            'nonce_str'        => Str::random(),
-//            'notify_url'       => $this->config->get('notify_url', ''),
-//            'sign'             => '',
-//            'trade_type'       => '',
-//            'spbill_create_ip' => Request::createFromGlobals()->getClientIp(),
-//        ];
-//
-//        if ($this->mode === static::MODE_SERVICE) {
-//            $this->payload = array_merge($this->payload, [
-//                'sub_mch_id' => $this->config->get('sub_mch_id'),
-//                'sub_appid'  => $this->config->get('sub_app_id', ''),
-//            ]);
-//        }
     }
 
     /**

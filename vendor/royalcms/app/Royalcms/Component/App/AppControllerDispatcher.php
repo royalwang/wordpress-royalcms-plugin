@@ -3,12 +3,11 @@
 namespace Royalcms\Component\App;
 
 use Royalcms\Component\DefaultRoute\HttpQueryRoute;
-use Royalcms\Component\Error\Facades\Error as RC_Error;
 use RC_Hook;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use InvalidArgumentException;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Royalcms\Component\Http\Response as RoyalcmsResponse;
 
 class AppControllerDispatcher
 {
@@ -52,27 +51,47 @@ class AppControllerDispatcher
         // so that we can call the methods on it. We will also apply any "after" filters
         // to the route so that they will be run by the routers after this processing.
         $controller = $this->makeController();
-        if ( $controller instanceof SymfonyResponse) {
+        if ( $controller instanceof RoyalcmsResponse) {
             return $controller;
         }
-        
+        elseif (is_rc_error($controller)) {
+
+            if (RC_Hook::has_action('royalcms_default_controller')) {
+                RC_Hook::do_action('royalcms_default_controller', $this->routePath);
+            }
+
+//            if (RC_Hook::has_action($this->routePath)) {
+//                RC_Hook::do_action($this->routePath);
+//                return royalcms('response');
+//            } else {
+//                abort(403, $controller->get_error_message());
+//            }
+
+        }
+
         try {
             
             if (RC_Hook::has_action($this->routePath)) {
                 // 实例化控制器对象，辅助给hook方法使用
-                with(new $controller);
+
+//                with(new $controller);
                 RC_Hook::do_action($this->routePath);
                 return royalcms('response');
             } else {
                 
                 $response = $this->route->runControllerAction($controller, $this->route->getAction());
-                
-                if ( ! $response instanceof SymfonyResponse) {
-                    return royalcms('response');
-                } else {
+
+                if ( $response instanceof RoyalcmsResponse) {
+                    if (! is_null($response->getOriginalContent())) {
+                        return $response;
+                    }
+                }
+
+                if (! is_null($response)) {
                     return $response;
                 }
-                
+
+                return royalcms('response');
             }
             
         } catch (NotFoundHttpException $e) {
@@ -98,22 +117,23 @@ class AppControllerDispatcher
             }
             
             $controller = $bundle->getControllerClassName($this->route->getController());
-            if (RC_Error::is_error($controller)) {
-                
-                if (RC_Hook::has_action('royalcms_default_controller')) {
-                    RC_Hook::do_action('royalcms_default_controller', $this->routePath);
-                }
-                
-                if (RC_Hook::has_action($this->routePath)) {
-                    RC_Hook::do_action($this->routePath);
-                    return royalcms('response');
-                } else {
-                    abort(403, $controller->get_error_message());
-                }
-                
-            } else {
-                return $controller;
-            }
+//            if (RC_Error::is_error($controller)) {
+//
+//                if (RC_Hook::has_action('royalcms_default_controller')) {
+//                    RC_Hook::do_action('royalcms_default_controller', $this->routePath);
+//                }
+//
+//                if (RC_Hook::has_action($this->routePath)) {
+//                    RC_Hook::do_action($this->routePath);
+//                    return royalcms('response');
+//                } else {
+//                    abort(403, $controller->get_error_message());
+//                }
+//
+//            } else {
+//                return $controller;
+//            }
+            return $controller;
         } catch (InvalidArgumentException $e) {
             abort(403, $e->getMessage());
         }

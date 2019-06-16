@@ -2,10 +2,12 @@
 
 namespace Royalcms\Component\Pay\PayVendor\Wechat\Gateways;
 
-use Symfony\Component\HttpFoundation\Request;
 use Royalcms\Component\Pay\PayVendor\Wechat\Wechat;
 use Royalcms\Component\Pay\Log;
 use Royalcms\Component\Support\Collection;
+use Royalcms\Component\Pay\Exceptions\GatewayException;
+use Royalcms\Component\Support\Str;
+use Royalcms\Component\Pay\PayVendor\Wechat\Support;
 
 class TransferGateway extends Gateway
 {
@@ -13,7 +15,7 @@ class TransferGateway extends Gateway
      * Pay an order.
      *
      * @param string $endpoint
-     * @param array  $payload
+     * @param \Royalcms\Component\Pay\PayVendor\Wechat\Orders\TransfersOrder $payload
      *
      * @throws \Royalcms\Component\Pay\Exceptions\GatewayException
      * @throws \Royalcms\Component\Pay\Exceptions\InvalidArgumentException
@@ -23,28 +25,44 @@ class TransferGateway extends Gateway
      */
     public function pay($endpoint, $payload)
     {
-        if ($this->mode === Wechat::MODE_SERVICE) {
-            unset($payload['sub_mch_id'], $payload['sub_appid']);
+        if (! ($payload instanceof \Royalcms\Component\Pay\PayVendor\Wechat\Orders\TransfersOrder)) {
+            throw new GatewayException('The payload must is "\Royalcms\Component\Pay\PayVendor\Wechat\Orders\TransfersOrder" instance!');
         }
-        $type = isset($payload['type']) ? ($payload['type'].($payload['type'] == 'app' ?: '_').'id') : 'app_id';
 
-        $payload['mch_appid'] = $this->config->get($type, '');
-        $payload['mchid'] = $payload['mch_id'];
-        php_sapi_name() === 'cli' ?: $payload['spbill_create_ip'] = Request::createFromGlobals()->server->get('SERVER_ADDR');
+        $api = $this->getMethod();
 
-        unset($payload['appid'], $payload['mch_id'], $payload['trade_type'],
-            $payload['notify_url'], $payload['type']);
+        /*
+        if ($this->mode === Wechat::MODE_SERVICE) {
+        }*/
 
-        $payload['sign'] = Support::generateSign($payload, $this->config->get('key'));
+        $payload->setMchAppid($this->config->get('mpapp_id')); //公众账号ID
+        $payload->setMchId($this->config->get('mch_id')); //商户号
+        $payload->setNonceStr(Str::random()); //随机字符串
 
-        Log::debug('Paying A Transfer Order:', [$endpoint, $payload]);
+        $sign = Support::generateSign($payload->toArray(), $this->config->get('key'));
+
+        $payload->setSign($sign); //签名
+
+        $params = $payload->toArray();
+
+        Log::debug('Paying A Transfer Order:', [$endpoint, $params]);
 
         return Support::requestApi(
-            'mmpaymkttransfers/promotion/transfers',
-            $payload,
+            $api,
+            $params,
             $this->config->get('key'),
             ['cert' => $this->config->get('cert_client'), 'ssl_key' => $this->config->get('cert_key')]
         );
+    }
+
+    /**
+     * Get method config.
+     *
+     * @return string
+     */
+    protected function getMethod()
+    {
+        return 'mmpaymkttransfers/promotion/transfers';
     }
 
     /**

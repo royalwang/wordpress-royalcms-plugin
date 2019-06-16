@@ -18,6 +18,11 @@ class TextdomainManager
     
     
     protected $locale;
+
+    /**
+     * @var \Royalcms\Component\Foundation\Royalcms
+     */
+    protected $royalcms;
     
     /**
      * Create a new TextdomainManager instance.
@@ -28,6 +33,8 @@ class TextdomainManager
     public function __construct(Locale $locale)
     {
         $this->locale = $locale;
+
+        $this->royalcms = royalcms();
     }
     
     
@@ -52,8 +59,7 @@ class TextdomainManager
      * Whether there are translations for the text domain.
      *
      * @since 3.0.0
-     * @param string $domain
-     *            Text domain. Unique identifier for retrieving translated strings.
+     * @param string $domain Text domain. Unique identifier for retrieving translated strings.
      * @return bool Whether there are translations.
      */
     public function isTextdomainLoaded($domain)
@@ -67,9 +73,8 @@ class TextdomainManager
      *
      * If there isn't one, returns empty Translations instance.
      *
-     * @param string $domain
-     *            Text domain. Unique identifier for retrieving translated strings.
-     * @return Translations A Translations instance.
+     * @param string $domain Text domain. Unique identifier for retrieving translated strings.
+     * @return \Royalcms\Component\Gettext\Translations\Translations A Translations instance.
      */
     public function getTranslationsForDomain($domain)
     {
@@ -93,10 +98,8 @@ class TextdomainManager
      *
      * @since 3.2.0
      *
-     * @param string $domain
-     *            Text domain. Unique identifier for retrieving translated strings.
-     * @param string $mofile
-     *            Path to the .mo file.
+     * @param string $domain Text domain. Unique identifier for retrieving translated strings.
+     * @param string $mofile Path to the .mo file.
      * @return bool True on success, false on failure.
      */
     public function loadTextdomain($domain, $mofile)
@@ -106,12 +109,9 @@ class TextdomainManager
          *
          * @since 3.2.0
          *
-         * @param bool $override
-         *            Whether to override the text domain. Default false.
-         * @param string $domain
-         *            Text domain. Unique identifier for retrieving translated strings.
-         * @param string $mofile
-         *            Path to the MO file.
+         * @param bool $override Whether to override the text domain. Default false.
+         * @param string $domain Text domain. Unique identifier for retrieving translated strings.
+         * @param string $mofile Path to the MO file.
          */
         $plugin_override = RC_Hook::apply_filters('override_load_textdomain', false, $domain, $mofile);
     
@@ -124,10 +124,8 @@ class TextdomainManager
          *
          * @since 2.9.0
          *
-         * @param string $domain
-         *            Text domain. Unique identifier for retrieving translated strings.
-         * @param string $mofile
-         *            Path to the .mo file.
+         * @param string $domain Text domain. Unique identifier for retrieving translated strings.
+         * @param string $mofile Path to the .mo file.
          */
         RC_Hook::do_action('load_textdomain', $domain, $mofile);
     
@@ -136,13 +134,11 @@ class TextdomainManager
          *
          * @since 3.2.0
          *
-         * @param string $mofile
-         *            Path to the MO file.
-         * @param string $domain
-         *            Text domain. Unique identifier for retrieving translated strings.
+         * @param string $mofile Path to the MO file.
+         * @param string $domain Text domain. Unique identifier for retrieving translated strings.
         */
         $mofile = RC_Hook::apply_filters('load_textdomain_mofile', $mofile, $domain);
-    
+
         if (! is_readable($mofile)) {
             return false;
         }
@@ -166,8 +162,7 @@ class TextdomainManager
      *
      * @since 3.0.0
      *
-     * @param string $domain
-     *            Text domain. Unique identifier for retrieving translated strings.
+     * @param string $domain Text domain. Unique identifier for retrieving translated strings.
      * @return bool Whether textdomain was unloaded.
      */
     public function unloadTextdomain($domain)
@@ -177,10 +172,8 @@ class TextdomainManager
          *
          * @since 3.0.0
          *
-         * @param bool $override
-         *            Whether to override unloading the text domain. Default false.
-         * @param string $domain
-         *            Text domain. Unique identifier for retrieving translated strings.
+         * @param bool $override Whether to override unloading the text domain. Default false.
+         * @param string $domain Text domain. Unique identifier for retrieving translated strings.
          */
         $plugin_override = RC_Hook::apply_filters('override_unload_textdomain', false, $domain);
     
@@ -193,8 +186,7 @@ class TextdomainManager
          *
          * @since 3.0.0
          *
-         * @param string $domain
-         *            Text domain. Unique identifier for retrieving translated strings.
+         * @param string $domain Text domain. Unique identifier for retrieving translated strings.
          */
         RC_Hook::do_action('unload_textdomain', $domain);
     
@@ -248,7 +240,7 @@ class TextdomainManager
         }
     
         // Otherwise, load from the languages directory
-        $mofile = SITE_LANG_PATH . "themes/{$domain}-{$locale}.mo";
+        $mofile = $this->royalcms->langPath() . "themes/{$domain}-{$locale}.mo";
         return $this->loadTextdomain($domain, $mofile);
     }
     
@@ -301,11 +293,11 @@ class TextdomainManager
         $locale = RC_Hook::apply_filters('app_locale', $locale, $domain);
     
         if (false !== $app_rel_path) {
-            $path = SITE_APP_PATH . trim($app_rel_path, '/');
+            $path = $this->royalcms->appPath() . trim($app_rel_path, '/');
         } else {
-            $path = trim(SITE_APP_PATH, '/');
+            $path = rtrim($this->royalcms->appPath(), '/');
         }
-        
+
         // Load the textdomain according to the app first
         $mofile = "{$domain}/languages/{$locale}/{$domain}.mo";
         $loaded = $this->loadTextdomain($domain, $path . '/' . $mofile);
@@ -314,7 +306,7 @@ class TextdomainManager
         }
 
         // Otherwise, load from the languages directory
-        $mofile = SITE_LANG_PATH . '/apps/' . $domain . '-' . $locale . '.mo';
+        $mofile = $this->royalcms->langPath() . '/apps/' . $domain . '-' . $locale . '.mo';
         return $this->loadTextdomain($domain, $mofile);
     }
     
@@ -345,13 +337,13 @@ class TextdomainManager
          *            Text domain. Unique identifier for retrieving translated strings.
         */
         $locale = RC_Hook::apply_filters('plugin_locale', $locale, $domain);
-    
+
         if (false !== $plugin_rel_path) {
-            $path = SITE_PLUGIN_PATH . trim($plugin_rel_path, '/');
+            $path = $this->royalcms->pluginPath() . trim($plugin_rel_path, '/');
         } else {
-            $path = trim(SITE_PLUGIN_PATH, '/');
+            $path = rtrim($this->royalcms->pluginPath(), '/');
         }
-        
+
         // Load the textdomain according to the plugin first
         $mofile = "{$domain}/languages/{$locale}/{$domain}.mo";
         $loaded = $this->loadTextdomain($domain, $path . '/' . $mofile);
@@ -360,7 +352,7 @@ class TextdomainManager
         }
 
         // Otherwise, load from the languages directory
-        $mofile = SITE_LANG_PATH . '/plugins/' . $domain . '-' . $locale . '.mo';
+        $mofile = $this->royalcms->langPath() . '/plugins/' . $domain . '-' . $locale . '.mo';
         return $this->loadTextdomain($domain, $mofile);
     }
     

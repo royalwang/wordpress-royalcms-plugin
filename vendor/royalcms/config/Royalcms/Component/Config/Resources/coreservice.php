@@ -24,6 +24,7 @@ return array(
         'URL'                  => 'Royalcms\Component\Support\Facades\URL',
         'File'                 => 'Royalcms\Component\Support\Facades\File',
 
+        'RC_Bus'               => 'Royalcms\Component\Support\Facades\Bus',
         'RC_Cache'             => 'Royalcms\Component\Support\Facades\Cache',
         'RC_Cookie'            => 'Royalcms\Component\Support\Facades\Cookie',
         'RC_Crypt'             => 'Royalcms\Component\Support\Facades\Crypt',
@@ -45,9 +46,7 @@ return array(
         'RC_Schema'            => 'Royalcms\Component\Support\Facades\Schema',
         'RC_Queue'             => 'Royalcms\Component\Support\Facades\Queue',
         'RC_Password'          => 'Royalcms\Component\Support\Facades\Password',
-        'RC_Redis'             => 'Royalcms\Component\Support\Facades\Redis',
         'RC_Route'             => 'Royalcms\Component\Support\Facades\Route',
-        'RC_Storage'           => 'Royalcms\Component\Storage\Facades\Storage',
         'RC_Filesystem'        => 'Royalcms\Component\Storage\Facades\Storage',
         'RC_Validator'         => 'Royalcms\Component\Support\Facades\Validator',
         'RC_View'              => 'Royalcms\Component\Support\Facades\View',
@@ -74,7 +73,6 @@ return array(
         'RC_Json'              => 'Royalcms\Component\Support\Json',
         'RC_Controller'        => 'Royalcms\Component\Routing\Controller',
         'RC_Ip'                => 'Royalcms\Component\IpAddress\Ip',
-        'RC_Upload'            => 'Royalcms\Component\Upload\Upload',
         'RC_Time'              => 'Royalcms\Component\DateTime\Time',
         'RC_Model'             => 'Royalcms\Component\Model\ModelManage',
         'RC_Http'              => 'Royalcms\Component\HttpRequest\HttpRequest',
@@ -157,6 +155,7 @@ return array(
     
     'providers' => array(
 
+        'Royalcms\Component\Bus\BusServiceProvider',
         'Royalcms\Component\Filesystem\FilesystemServiceProvider',
         'Royalcms\Component\Database\DatabaseServiceProvider',
         'Royalcms\Component\Database\SeedServiceProvider',
@@ -164,6 +163,7 @@ return array(
         'Royalcms\Component\Cache\CacheServiceProvider',
         'Royalcms\Component\Encryption\EncryptionServiceProvider',
         'Royalcms\Component\Log\LogServiceProvider',
+        'Royalcms\Component\Routing\ControllerServiceProvider',
         'Royalcms\Component\Cookie\CookieServiceProvider',
         'Royalcms\Component\Session\SessionServiceProvider',
         'Royalcms\Component\Translation\TranslationServiceProvider',
@@ -180,10 +180,7 @@ return array(
         'Royalcms\Component\Package\PackageServiceProvider',
         'Royalcms\Component\App\AppServiceProvider',
         'Royalcms\Component\Variable\VariableServiceProvider',
-        'Royalcms\Component\SmartyView\SmartyServiceProvider',
         'Royalcms\Component\Rewrite\RewriteServiceProvider',
-        'Royalcms\Component\Purifier\PurifierServiceProvider',
-        'Royalcms\Component\LogViewer\LogViewerServiceProvider',
         'Royalcms\Component\Storage\StorageServiceProvider',
         'Royalcms\Component\Timer\TimerServiceProvider',
         'Royalcms\Component\Script\ScriptServiceProvider',

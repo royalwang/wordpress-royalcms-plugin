@@ -264,7 +264,7 @@ class TransfersOrder implements PayloadInterface
      */
     public function setAmount($amount)
     {
-        $this->amount = $amount;
+        $this->amount = intval(strval($amount));
         return $this;
     }
 

@@ -69,9 +69,14 @@ class ConfigCacheCommand extends Command
      */
     protected function getFreshConfiguration()
     {
-        $royalcms = require $this->royalcms->bootstrapPath().'/royalcms.php';
+        if ($this->royalcms->runningInConsole()) {
+            $royalcms = require $this->royalcms->bootstrapPath().'/royalcms.php';
 
-        $royalcms->make('Royalcms\Component\Contracts\Console\Kernel')->bootstrap();
+            $royalcms->make('Royalcms\Component\Contracts\Console\Kernel')->bootstrap();
+        }
+        else {
+            $royalcms = $this->royalcms;
+        }
 
         return $royalcms['config']->all();
     }
@@ -83,15 +88,9 @@ class ConfigCacheCommand extends Command
     {
         if ($this->option('exclude'))
         {
-            unset($config['*::system']);
-            unset($config['*::namespaces']);
-            unset($config['*::provider']);
-            unset($config['*::cache']);
-            unset($config['*::app']);
-            unset($config['*::session']);
-            unset($config['*::view']);
-            unset($config['smarty-view::smarty']);
-            unset($config['excel::export']);
+            collect(config('compile.exclude_configs', []))->map(function($item) use (& $config) {
+                unset($config[$item]);
+            });
         }
 
     }
@@ -104,7 +103,7 @@ class ConfigCacheCommand extends Command
     protected function getOptions()
     {
         return [
-            ['exclude', null, InputOption::VALUE_NONE, 'Exclude special configuration files to be compiled.'],
+            ['exclude', 'e', InputOption::VALUE_NONE, 'Exclude special configuration files to be compiled.'],
         ];
     }
 
