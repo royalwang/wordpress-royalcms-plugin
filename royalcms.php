@@ -1,14 +1,14 @@
 <?php
 /**
  * @package Royalcms
- * @version 5.4.0
+ * @version 5.15.0
  */
 /*
  Plugin Name: Royalcms Framework
  Plugin URI: http://wordpress.org/plugins/royalcms/
  Description: 基于royalcms的全栈PHP框架，使用现代PHP构建Wordpress的插件、主题更加方便、快捷。
  Author: Royal Wang
- Version: 5.4.0
+ Version: 5.15.0
  Author URI: http://royalcms.cn/
  */
 
